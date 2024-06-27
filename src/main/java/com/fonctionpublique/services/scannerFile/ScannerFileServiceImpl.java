@@ -56,32 +56,32 @@ public class ScannerFileServiceImpl implements ScannerFileService{
 //    }
 
 
-    private final ScannerFileRepository scannerFileRepository;
-
-    @Override
-    public ScannerFile store(MultipartFile file) throws IOException {
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-        ScannerFile FileDB = new ScannerFile(fileName, file.getContentType(), file.getBytes());
-
-        return scannerFileRepository.save(FileDB);
-    }
-
-    @Override
-    public ScannerFile getFile(String id) {
-        return scannerFileRepository.findById(id).orElseThrow(() -> new RuntimeException("File not found"));
-    }
-
-    @Override
-    public Stream<ScannerFile> getAllFiles() {
-        return scannerFileRepository.findAll().stream();
-    }
-
-    public ScannerFile saveScannerFile(MultipartFile fichier) throws Exception {
-        String nomFichier = StringUtils.cleanPath(Objects.requireNonNull(fichier.getOriginalFilename()));
-        if (nomFichier.contains("..")) {
-            throw new Exception("Le nom du fichier est incorrect: " + nomFichier);
-        }
-        ScannerFile scannerFile = new ScannerFile(nomFichier, fichier.getContentType(), fichier.getBytes());
-        return scannerFileRepository.save(scannerFile);
-    }
+//    private final ScannerFileRepository scannerFileRepository;
+//
+//    @Override
+//    public ScannerFile store(MultipartFile file) throws IOException {
+//        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+//        ScannerFile FileDB = new ScannerFile(fileName, file.getContentType(), file.getBytes());
+//
+//        return scannerFileRepository.save(FileDB);
+//    }
+//
+//    @Override
+//    public ScannerFile getFile(String id) {
+//        return scannerFileRepository.findById(id).orElseThrow(() -> new RuntimeException("File not found"));
+//    }
+//
+//    @Override
+//    public Stream<ScannerFile> getAllFiles() {
+//        return scannerFileRepository.findAll().stream();
+//    }
+//
+//    public ScannerFile saveScannerFile(MultipartFile fichier) throws Exception {
+//        String nomFichier = StringUtils.cleanPath(Objects.requireNonNull(fichier.getOriginalFilename()));
+//        if (nomFichier.contains("..")) {
+//            throw new Exception("Le nom du fichier est incorrect: " + nomFichier);
+//        }
+//        ScannerFile scannerFile = new ScannerFile(nomFichier, fichier.getContentType(), fichier.getBytes());
+//        return scannerFileRepository.save(scannerFile);
+//    }
 }

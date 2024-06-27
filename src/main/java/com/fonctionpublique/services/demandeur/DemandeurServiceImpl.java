@@ -1,7 +1,7 @@
 package com.fonctionpublique.services.demandeur;
 
+import com.fonctionpublique.dto.DemandeDTO;
 import com.fonctionpublique.dto.DemandeurDTO;
-import com.fonctionpublique.entities.Demande;
 import com.fonctionpublique.entities.Demandeur;
 import com.fonctionpublique.entities.Utilisateur;
 import com.fonctionpublique.enumpackage.StatusDemande;
@@ -50,6 +50,14 @@ public class DemandeurServiceImpl implements  DemandeurService {
         }
         return "false";
     }
+    private Boolean validationDemandeur(Demandeur demandeur){
+        if(demandeur.getDatedenaissance() != null && demandeur.getLieudenaissance()!= null &&
+            demandeur.getNin() != null && demandeur.getSexe()!= null  && demandeur.getScannernin() != null &&
+            demandeur.getAdresse() != null && demandeur.getFonction() != null && demandeur.getTelephone() != null){
+            return false;
+        }
+        return  true;
+    }
 
     @Override
     public DemandeurDTO getByNin(String nin) {
@@ -71,6 +79,15 @@ public class DemandeurServiceImpl implements  DemandeurService {
         }
         return null;
     }
+    @Override
+    public DemandeurDTO getByUserId(String nin){
+        Optional<Demandeur> optionalDemandeur = demandeurRepository.findByNin(nin);
+        if(optionalDemandeur.isPresent()){
+            return  convertToDTO(optionalDemandeur.get());
+
+        }
+        return null;
+    }
     public DemandeurDTO convertToDTO(Demandeur demandeur){
 
         return DemandeurDTO.builder()
@@ -89,6 +106,7 @@ public class DemandeurServiceImpl implements  DemandeurService {
                 .userId(demandeur.getUtilisateur().getId())
                 .statut(demandeur.getStatut())
                 .fullName(demandeur.getUtilisateur().getFullName())
+                .isCompleted(demandeur.isCompleted())
                 .build();
 
     }
@@ -105,4 +123,6 @@ public class DemandeurServiceImpl implements  DemandeurService {
         BeanUtils.copyProperties(demandeurDTO,demandeur);
         return  convertToDTO(demandeurRepository.save(demandeur));
     }
+
+
 }

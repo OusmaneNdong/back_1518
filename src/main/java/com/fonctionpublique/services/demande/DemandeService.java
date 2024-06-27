@@ -19,8 +19,7 @@ public interface DemandeService {
 
     List<DemandeDTO> findByStatut(String status);
 
+    List<DemandeDTO> findByDemandeurId(int id);
 
-//    List<DemandeDTO> getByIdDemandeur(int idDemandeur);
 
-//    List<DemandeDTO> findByDemandeur(Demandeur demandeur);
 }

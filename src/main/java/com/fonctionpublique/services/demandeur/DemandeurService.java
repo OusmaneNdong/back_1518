@@ -1,6 +1,8 @@
 package com.fonctionpublique.services.demandeur;
 
+import com.fonctionpublique.dto.DemandeDTO;
 import com.fonctionpublique.dto.DemandeurDTO;
+import com.fonctionpublique.entities.Demande;
 import com.fonctionpublique.entities.Demandeur;
 
 import java.util.List;
@@ -13,6 +15,10 @@ public interface DemandeurService {
 
     DemandeurDTO getById(int id);
 
+    DemandeurDTO getByUserId(String nin);
+
     public List<DemandeurDTO> findAll();
     DemandeurDTO update(DemandeurDTO demandeurDTO);
+
+
 }

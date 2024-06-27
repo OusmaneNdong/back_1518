@@ -91,7 +91,8 @@ public class AttestationServiceImpl implements  AttestationService{
         imageLogoMinister.setHeight(50);
 
 
-        String urlcachet = "/Users/7maksacodpc/Downloads/cachet_sane.png";
+        //String urlcachet = "/Users/7maksacodpc/Downloads/cachet_sane.png";
+        String urlcachet = utilisateur.getSignature();// "/Users/7maksacodpc/Downloads/cachet_sane.png";
             ImageData cachet = ImageDataFactory.create(urlcachet);
             Image imageCachet = new Image(cachet);
             imageCachet.setWidth(130);

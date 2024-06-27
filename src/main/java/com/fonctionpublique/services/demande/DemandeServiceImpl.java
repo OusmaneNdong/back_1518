@@ -9,10 +9,8 @@ import com.fonctionpublique.enumpackage.StatusDemande;
 import com.fonctionpublique.repository.CertificationRepository;
 import com.fonctionpublique.repository.DemandeRepository;
 import com.fonctionpublique.repository.DemandeurRepository;
-import com.fonctionpublique.repository.UtilisateurRepository;
 import com.fonctionpublique.services.certification.CertificationServiceImpl;
 import com.fonctionpublique.services.demandeur.DemandeurServiceImpl;
-import com.fonctionpublique.services.utilisateur.UtilisateurServiceImpl;
 import com.google.zxing.WriterException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -130,6 +128,11 @@ public class DemandeServiceImpl implements DemandeService {
     @Override
     public List<DemandeDTO> findByStatut(String status) {
         return demandeRepository.findByStatut(status).stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<DemandeDTO> findByDemandeurId(int id){
+        return demandeRepository.findByDemandeurId(id).stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
 

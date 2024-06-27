@@ -27,6 +27,7 @@ public class DemandeurDTO {
     private String prenom;
     private String nom;
     private String fullName;
+    private boolean isCompleted;
     private int userId;
     private List<DemandeDTO> demandeDTO;
 }

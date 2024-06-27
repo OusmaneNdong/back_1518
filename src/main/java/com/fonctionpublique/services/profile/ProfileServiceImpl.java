@@ -55,6 +55,20 @@ public class ProfileServiceImpl implements ProfileService {
                 utilisateur.setProfile(adminProfile);
                 utilisateurRepository.save(utilisateur);
 
+                Utilisateur utilisateur1 = new Utilisateur();
+                utilisateur1.setPrenom("Admin_1");
+                utilisateur1.setNom("admin");
+                utilisateur1.setEmail("admin1@gmail.com");
+                utilisateur1.setPassword(passwordEncoder.encode("passer"));
+                utilisateur1.setNin("1234567890987");
+                utilisateur1.setStatut("true");
+                utilisateur1.setSignature("/Users/7maksacodpc/Downloads/a1.jpeg");
+                utilisateur1.setProfile(adminProfile);
+                utilisateurRepository.save(utilisateur1);
+
+
+
+
                 return null;
 
             });

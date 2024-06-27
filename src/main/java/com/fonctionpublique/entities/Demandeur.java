@@ -36,6 +36,16 @@ public class Demandeur {
     @OneToMany
     private List<Demande> demande;
 
+    public boolean isCompleted(){
+        if (telephone == null || datedenaissance == null || lieudenaissance == null
+            || adresse == null || sexe ==null || fonction == null || nin == null
+            || scannernin == null || statut == null){
+            return  false;
+        }
+        return true;
+
+    }
+
 
 
 }

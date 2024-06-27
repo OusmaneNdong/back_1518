@@ -37,7 +37,7 @@ public class WebSecurityConfigurer {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity security) throws Exception {
-        return security.csrf().disable()
+        security.csrf().disable()
                 .authorizeHttpRequests()
                 .requestMatchers(
                         "/api/utilisateur/password-reset-request",
@@ -67,6 +67,7 @@ public class WebSecurityConfigurer {
                         "/api/demande/getDemande",
                         "/api/demande/getStatut/**",
                         "/api/demande/getDemandeurByDemande",
+                        "/api/demande/findDemandeurById/**",
 
                         "/api/dashbord/total",
                         "/api/dashbord/total-cours",
@@ -86,7 +87,10 @@ public class WebSecurityConfigurer {
                         "/api/certification/generatedAttestation/**",
 
                         "/api/scanner/upload",
-                        "/api/scanner/telechargement/**"
+                        "/api/scanner/telechargement/**",
+                        "/api/uploads",
+                        "/api/uploads/download/**"
+
 
                 ).permitAll()
                 .anyRequest().authenticated()
@@ -95,14 +99,15 @@ public class WebSecurityConfigurer {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .addFilterBefore(utilisateurFilter, UsernamePasswordAuthenticationFilter.class)
-                 .build()
+                .cors();
+                 return security.build()
          ;
 
       //  return security.build();
 
     }
 
-    /*@Bean
+    @Bean
     public CorsFilter corsFilter() {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         final CorsConfiguration config = new CorsConfiguration();
@@ -112,7 +117,7 @@ public class WebSecurityConfigurer {
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
-    }*/
+    }
     @Bean
     public PasswordEncoder passwordEncoder(){
         return  new BCryptPasswordEncoder();

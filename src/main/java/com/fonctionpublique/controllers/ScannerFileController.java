@@ -123,54 +123,54 @@ public class ScannerFileController {
 //                    .body(fileDB.getData());
 //        }
 
-    private final ScannerFileServiceImpl scannerFileServiceImpl;
+//    private final ScannerFileServiceImpl scannerFileServiceImpl;
 
-    @PostMapping("/upload")
-    public ResponseEntity<ScannerFileResponse> uploadFichier(@RequestParam("fichier") MultipartFile fichier) {
-        try {
-            ScannerFile scannerFile = scannerFileServiceImpl.saveScannerFile(fichier);
-            String downloadURL = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/api/scanner/telechargement/")
-                    .path(scannerFile.getId())
-                    .toUriString();
-            ScannerFileResponse response = new ScannerFileResponse(scannerFile.getName(), downloadURL, fichier.getContentType(), (int) fichier.getSize());
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ScannerFileResponse("Failed to upload file", null, null, 0));
-        }
-    }
+//    @PostMapping("/upload")
+//    public ResponseEntity<ScannerFileResponse> uploadFichier(@RequestParam("fichier") MultipartFile fichier) {
+//        try {
+//            ScannerFile scannerFile = scannerFileServiceImpl.saveScannerFile(fichier);
+//            String downloadURL = ServletUriComponentsBuilder.fromCurrentContextPath()
+//                    .path("/api/scanner/telechargement/")
+//                    .path(scannerFile.getId())
+//                    .toUriString();
+//            ScannerFileResponse response = new ScannerFileResponse(scannerFile.getName(), downloadURL, fichier.getContentType(), (int) fichier.getSize());
+//            return new ResponseEntity<>(response, HttpStatus.CREATED);
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(new ScannerFileResponse("Failed to upload file", null, null, 0));
+//        }
+//    }
 
-    @GetMapping("/telechargement/{id}")
-    public ResponseEntity<Resource> getFile(@PathVariable String id) {
-        try {
-            ScannerFile fileDB = scannerFileServiceImpl.getFile(id);
-            return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(fileDB.getType()))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileDB.getName() + "\"")
-                    .body(new ByteArrayResource(fileDB.getData()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
+//    @GetMapping("/telechargement/{id}")
+//    public ResponseEntity<Resource> getFile(@PathVariable String id) {
+//        try {
+//            ScannerFile fileDB = scannerFileServiceImpl.getFile(id);
+//            return ResponseEntity.ok()
+//                    .contentType(MediaType.parseMediaType(fileDB.getType()))
+//                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileDB.getName() + "\"")
+//                    .body(new ByteArrayResource(fileDB.getData()));
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+//        }
+//    }
 
-    @GetMapping("/files")
-    public ResponseEntity<List<ScannerFileResponse>> getListFiles() {
-        List<ScannerFileResponse> files = scannerFileServiceImpl.getAllFiles().map(dbFile -> {
-            String fileDownloadUri = ServletUriComponentsBuilder
-                    .fromCurrentContextPath()
-                    .path("/api/scanner/telechargement/")
-                    .path(dbFile.getId())
-                    .toUriString();
-
-            return new ScannerFileResponse(
-                    dbFile.getName(),
-                    fileDownloadUri,
-                    dbFile.getType(),
-                    dbFile.getData().length);
-        }).collect(Collectors.toList());
-
-        return ResponseEntity.status(HttpStatus.OK).body(files);
-    }
+//    @GetMapping("/files")
+//    public ResponseEntity<List<ScannerFileResponse>> getListFiles() {
+//        List<ScannerFileResponse> files = scannerFileServiceImpl.getAllFiles().map(dbFile -> {
+//            String fileDownloadUri = ServletUriComponentsBuilder
+//                    .fromCurrentContextPath()
+//                    .path("/api/scanner/telechargement/")
+//                    .path(dbFile.getId())
+//                    .toUriString();
+//
+//            return new ScannerFileResponse(
+//                    dbFile.getName(),
+//                    fileDownloadUri,
+//                    dbFile.getType(),
+//                    dbFile.getData().length);
+//        }).collect(Collectors.toList());
+//
+//        return ResponseEntity.status(HttpStatus.OK).body(files);
+//    }
 
 }

@@ -80,6 +80,8 @@ public class DemandeurController {
     @GetMapping("/demandeurDetails/{id}")
     public ResponseEntity<DemandeurDTO> getById(@PathVariable int id){
         return  ResponseEntity.ok(demandeurServiceImpl.getById(id));
-
     }
+
+//    @GetMapping("/getDemandeur/{nin}")
+//    public ResponseEntity<DemandeurDTO> getByNin(@PathVariable String nin)
 }

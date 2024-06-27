@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/demande")
@@ -31,6 +32,10 @@ public class DemandeController {
     public ResponseEntity<DemandeDTO> getById(@PathVariable int id){
         return  ResponseEntity.ok(demandeServiceImpl.getById(id));
 
+    }
+    @GetMapping("/findDemandeurById/{id}")
+    public  List<DemandeDTO> findByDemandeurId(@PathVariable("id") int id){
+        return demandeServiceImpl.findByDemandeurId(id);
     }
     @GetMapping("/getDemande")
     public List<DemandeDTO> findAll(){
