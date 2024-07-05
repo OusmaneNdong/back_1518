@@ -1,6 +1,7 @@
 package com.fonctionpublique.dto;
 
 import com.fonctionpublique.entities.Certification;
+import com.fonctionpublique.entities.Demande;
 import com.fonctionpublique.entities.Utilisateur;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,6 +16,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DemandeDTO {
+
     private int id;
     private String urlattestation;
     private String statut;
@@ -28,5 +30,4 @@ public class DemandeDTO {
     private CertificationDTO certificationDTO;
     //private UtilisateurDTO utilisateurDTO;
     private DemandeurDTO demandeurDTO;
-
 }

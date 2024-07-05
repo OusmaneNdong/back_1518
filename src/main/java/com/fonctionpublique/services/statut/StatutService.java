@@ -9,9 +9,6 @@ import com.fonctionpublique.entities.Utilisateur;
 import java.io.FileNotFoundException;
 
 public interface StatutService {
-//    String approuvedStatut(RegistrationRequest registrationRequest) throws FileNotFoundException;
 
-    String approuvedStatut(Utilisateur u, Demandeur d, Demande dm, Structure s) throws FileNotFoundException;
-
-//    String approuvedStatut(Utilisateur registrationRequest) throws FileNotFoundException;
+    Integer rejetedStatut(Integer id);
 }

@@ -43,4 +43,13 @@ public class CompteurServiceImpl implements  CompteurService{
         compteur.setName("Total_Approuved");
         compteurRepository.save(compteur);
     }
+
+    public Compteur findById(Integer id){
+        return compteurRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public Integer save(Compteur compteur) {
+        return compteurRepository.save(compteur).getId();
+    }
 }

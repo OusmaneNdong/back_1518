@@ -2,9 +2,12 @@ package com.fonctionpublique.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -12,54 +15,61 @@ import java.util.Set;
 @AllArgsConstructor
 @Entity
 @Builder
-public class Utilisateur {
+public class Utilisateur implements UserDetails {
     @Id
-    @GeneratedValue(strategy =  GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String prenom;
     private String nom;
+    @Column(unique = true)
     private String email;
     private String password;
     private String typePieces;
+    @Column(unique = true)
     private String nin;
     private String passPort;
-    private String statut;
+    private boolean statut;
     private String signature;
     @OneToOne
     private Demandeur demandeur;
     @OneToMany(mappedBy = "utilisateur")
-    private  List<Demande> demande;
+    private List<Demande> demande;
     @ManyToOne
     @JoinColumn(name = "profile_id")
     private Profile profile;
 
-    public String getFullName(){
+    public String getFullName() {
         return prenom + " " + nom;
     }
 
-//    public Utilisateur(String prenom, String nom, String email, String password, String nin, String statut,Profile profile,) {
-//        this.prenom = prenom;
-//        this.nom = nom;
-//        this.email = email;
-//        this.password = password;
-//        this.nin = nin;
-//        this.statut = statut;
-//        this.profile = profile;
-//    }
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(profile.getCode()));
+    }
 
-//    public Utilisateur(int id, String prenom, String nom, String email, String password, String typePieces, String nin, String passPort, String statut, String signature, Demandeur demandeur, List<Demande> demande, Profile profile) {
-//        this.id = id;
-//        this.prenom = prenom;
-//        this.nom = nom;
-//        this.email = email;
-//        this.password = password;
-//        this.typePieces = typePieces;
-//        this.nin = nin;
-//        this.passPort = passPort;
-//        this.statut = statut;
-//        this.signature = signature;
-//        this.demandeur = demandeur;
-//        this.demande = demande;
-//        this.profile = profile;
-//    }
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return statut;
+    }
+
 }

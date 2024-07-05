@@ -1,94 +1,62 @@
 package com.fonctionpublique.services.demandeur;
 
-import com.fonctionpublique.dto.DemandeDTO;
 import com.fonctionpublique.dto.DemandeurDTO;
 import com.fonctionpublique.entities.Demandeur;
 import com.fonctionpublique.entities.Utilisateur;
 import com.fonctionpublique.enumpackage.StatusDemande;
 import com.fonctionpublique.repository.DemandeurRepository;
 import com.fonctionpublique.repository.UtilisateurRepository;
-import com.fonctionpublique.services.demande.DemandeServiceImpl;
+import com.fonctionpublique.validators.ObjectValidator;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 @RequiredArgsConstructor
 @Service
-public class DemandeurServiceImpl implements  DemandeurService {
+public class DemandeurServiceImpl implements DemandeurService {
 
     private final DemandeurRepository demandeurRepository;
     private final UtilisateurRepository utilisateurRepository;
-    //private final DemandeServiceImpl demandeServiceImpl;
+    private final ObjectValidator<DemandeurDTO> validator;
 
-    public String creerDemandeur(DemandeurDTO demandeurDTO) {
-
-        Optional<Utilisateur> optionalUtilisateurs = utilisateurRepository.findByNin(demandeurDTO.getNin());
-
-        if (optionalUtilisateurs.isPresent()) {
-
-            Demandeur demandeur = new Demandeur();
-            demandeur.setTelephone(demandeurDTO.getTelephone());
-            demandeur.setDatedenaissance(demandeurDTO.getDatedenaissance());
-            demandeur.setLieudenaissance(demandeurDTO.getLieudenaissance());
-            demandeur.setAdresse(demandeurDTO.getAdresse());
-            demandeur.setSexe(demandeurDTO.getSexe());
-            demandeur.setFonction(demandeurDTO.getFonction());
-            demandeur.setNin(demandeurDTO.getNin());
-            demandeur.setScannernin(demandeurDTO.getScannernin());
-            demandeur.setStatut(StatusDemande.DEMANDE_EN_COURS.getStatut());
-            demandeur.setUtilisateur(optionalUtilisateurs.get());
-            demandeurRepository.save(demandeur);
-
-            optionalUtilisateurs.get().setDemandeur(demandeur);
-            utilisateurRepository.save(optionalUtilisateurs.get());
-            return "true";
-
+    public int creerDemandeur(DemandeurDTO demandeurDTO) {
+        validator.validate(demandeurDTO);
+        Optional<Utilisateur> optionalUtilisateurs =
+                utilisateurRepository.findByNin(demandeurDTO.getNin());
+        if (!optionalUtilisateurs.isPresent()){
+            throw new EntityNotFoundException("NOT_FOUND");
         }
-        return "false";
-    }
-    private Boolean validationDemandeur(Demandeur demandeur){
-        if(demandeur.getDatedenaissance() != null && demandeur.getLieudenaissance()!= null &&
-            demandeur.getNin() != null && demandeur.getSexe()!= null  && demandeur.getScannernin() != null &&
-            demandeur.getAdresse() != null && demandeur.getFonction() != null && demandeur.getTelephone() != null){
-            return false;
-        }
-        return  true;
+        Demandeur demandeur = convertToEntity(demandeurDTO);
+        demandeur.setStatut(StatusDemande.DEMANDE_EN_COURS.getStatut());
+        demandeur.setUtilisateur(optionalUtilisateurs.get());
+        demandeurRepository.save(demandeur);
+        optionalUtilisateurs.get().setDemandeur(demandeur);
+        utilisateurRepository.save(optionalUtilisateurs.get());
+        return demandeur.getId();
     }
 
     @Override
     public DemandeurDTO getByNin(String nin) {
-        return convertToDTO(Objects.requireNonNull(demandeurRepository.findByNin(nin).orElse(null))) ;
-    }
-
-    @Override
-    public Optional<Demandeur> getByStatut(String statut) {
-            return demandeurRepository.findByStatut(statut);
-
+        return demandeurRepository.findByNin(nin)
+                .map(this::convertToDTO)
+                .orElseThrow(() -> new EntityNotFoundException("Not found"));
     }
 
     @Override
     public DemandeurDTO getById(int id) {
-//        return convertToDTO(Objects.requireNonNull(demandeurRepository.findById(id).orElse(null))) ;
-        Optional<Demandeur> demandeur = Optional.ofNullable(demandeurRepository.findById(id).orElseThrow(null));
-        if(demandeur.isPresent()){
-            return convertToDTO(demandeur.get());
-        }
-        return null;
+        return demandeurRepository.findById(id).map(this::convertToDTO).orElseThrow(() -> new EntityNotFoundException("not found"));
     }
-    @Override
-    public DemandeurDTO getByUserId(String nin){
-        Optional<Demandeur> optionalDemandeur = demandeurRepository.findByNin(nin);
-        if(optionalDemandeur.isPresent()){
-            return  convertToDTO(optionalDemandeur.get());
 
-        }
-        return null;
+    @Override
+    public List<DemandeurDTO> findAll() {
+        return demandeurRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
     }
-    public DemandeurDTO convertToDTO(Demandeur demandeur){
+
+    public DemandeurDTO convertToDTO(Demandeur demandeur) {
 
         return DemandeurDTO.builder()
                 .id(demandeur.getId())
@@ -111,17 +79,19 @@ public class DemandeurServiceImpl implements  DemandeurService {
 
     }
 
-    @Override
-    public List<DemandeurDTO> findAll() {
-        return demandeurRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
-    }
-
-
-    @Override
-    public DemandeurDTO update(DemandeurDTO demandeurDTO) {
-        Demandeur demandeur = new Demandeur();
-        BeanUtils.copyProperties(demandeurDTO,demandeur);
-        return  convertToDTO(demandeurRepository.save(demandeur));
+    public Demandeur convertToEntity(DemandeurDTO demandeurDTO) {
+        return Demandeur.builder()
+                .id(demandeurDTO.getId())
+                .nin(demandeurDTO.getNin())
+                .adresse(demandeurDTO.getAdresse())
+                .datedenaissance(demandeurDTO.getDatedenaissance())
+                .fonction(demandeurDTO.getFonction())
+                .lieudenaissance(demandeurDTO.getLieudenaissance())
+                .statut(demandeurDTO.getStatut())
+                .scannernin(demandeurDTO.getScannernin())
+                .sexe(demandeurDTO.getSexe())
+                .telephone(demandeurDTO.getTelephone())
+                .build();
     }
 
 

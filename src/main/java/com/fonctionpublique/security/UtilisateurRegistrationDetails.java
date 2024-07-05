@@ -19,14 +19,14 @@ public class UtilisateurRegistrationDetails implements UserDetails {
     private boolean isEnable;
     private List<GrantedAuthority> authorities;
 
-    public UtilisateurRegistrationDetails(Utilisateur user) {
-        this.email = user.getEmail();
-        this.password = user.getPassword();
-//        this.isEnable = user.isEnable();
-        this.authorities = Arrays.stream(user.getStatut()
-                .split(","))
-                .map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-    }
+//    public UtilisateurRegistrationDetails(Utilisateur user) {
+//        this.email = user.getEmail();
+//        this.password = user.getPassword();
+////        this.isEnable = user.isEnable();
+//        this.authorities = Arrays.stream(user.isStatut()
+//                .split(","))
+//                .map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+//    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

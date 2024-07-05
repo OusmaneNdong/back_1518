@@ -33,7 +33,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class WebSecurityConfigurer {
 
-    private final UtilisateurFilter utilisateurFilter;
+    /*private final UtilisateurFilter utilisateurFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity security) throws Exception {
@@ -126,6 +126,6 @@ public class WebSecurityConfigurer {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
-    }
+    }*/
 
 }

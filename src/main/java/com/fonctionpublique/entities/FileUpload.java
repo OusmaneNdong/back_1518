@@ -19,12 +19,11 @@ public class FileUpload  implements Serializable {
     private long id;
     private String name;
     private String type;
-    private String owneBy;
-    private String description;
     @Lob
     @Column(columnDefinition = "LONGBLOB")
     @Transient
     private byte[] file;
     @Column(name = "upload_dir")
     private String uploadDir;
+
 }

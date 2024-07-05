@@ -14,8 +14,7 @@ public interface DemandeService {
     DemandeDTO getById(int id);
 
     //    boolean creerDemande(DemandeDTO demandeDTO);
-    Integer creerDemande(Demande demande, int id) throws IOException, WriterException;
-    List<DemandeDTO> findAllDemande() throws IOException, WriterException;
+    Integer creerDemande(int id) throws IOException, WriterException;
 
     List<DemandeDTO> findByStatut(String status);
 

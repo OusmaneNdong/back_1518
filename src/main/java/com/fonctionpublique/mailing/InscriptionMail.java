@@ -26,7 +26,7 @@ public class InscriptionMail {
         this.emailSender = emailSender;
     }
 
-    public String sendSimpleMessage(String subject, String text, String s, List<String> ccList) {
+    public String sendSimpleMessage(String subject, String text, String s) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("ndongmafale10@gmail.com");
 
@@ -38,17 +38,8 @@ public class InscriptionMail {
             return "fallback@example.com";
         }
 
-        message.setSubject(subject);
+        message.setSubject("Activation de Compte Pour l'Access á la Plateforme De Demandes D'Attestations");
         message.setText(text);
-
-        List<String> validCcList = ccList.stream()
-                .filter(Objects::nonNull)
-                .filter(this::isValidEmailAddress)
-                .collect(Collectors.toList());
-
-        if (!validCcList.isEmpty()) {
-            message.setCc(validCcList.toArray(new String[0]));
-        }
 
         try {
             emailSender.send(message);

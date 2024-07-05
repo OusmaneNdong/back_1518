@@ -1,20 +1,20 @@
 package com.fonctionpublique.services.demande;
 
 import com.fonctionpublique.dto.DemandeDTO;
-import com.fonctionpublique.entities.Certification;
 import com.fonctionpublique.entities.Demande;
 import com.fonctionpublique.entities.Demandeur;
-import com.fonctionpublique.entities.Utilisateur;
 import com.fonctionpublique.enumpackage.StatusDemande;
+import com.fonctionpublique.enumpackage.TypeDemande;
 import com.fonctionpublique.repository.CertificationRepository;
 import com.fonctionpublique.repository.DemandeRepository;
 import com.fonctionpublique.repository.DemandeurRepository;
 import com.fonctionpublique.services.certification.CertificationServiceImpl;
 import com.fonctionpublique.services.demandeur.DemandeurServiceImpl;
+import com.fonctionpublique.validators.ObjectValidator;
 import com.google.zxing.WriterException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -33,51 +33,67 @@ public class DemandeServiceImpl implements DemandeService {
     private final CertificationServiceImpl certificationServiceImpl;
     private final CertificationRepository certificationRepository;
     private final DemandeurServiceImpl demandeurService;
+    private final ObjectValidator<DemandeDTO> validator;
 
-
+    /**
+     * List all demandes
+     *
+     * @return
+     */
     @Override
     public List<DemandeDTO> findAll() {
         return demandeRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
     }
+
+    /**
+     * return a demande by id
+     *
+     * @param id
+     * @return
+     */
     @Override
     public DemandeDTO getById(int id) {
         Optional<Demande> demande = demandeRepository.findById(id);
-        if (demande.isPresent()){
+        if (demande.isPresent()) {
             return convertToDTO(demande.get());
-        }
-        return null ;
-    }
-    @Override
-    public Integer creerDemande(Demande demande,int id) throws IOException, WriterException {
-
-        Optional<Demandeur> demandeur = demandeurRepository.findById(id);
-
-        if (isValidDemande(demande)) {
-            if (demandeur.isPresent()) {
-                demande.setDemandeur(demandeur.get());
-                demande.setNumerodemande(certificationServiceImpl.generateAttestationNumber(id));
-                demande.setStatut(StatusDemande.DEMANDE_EN_COURS.getStatut());
-                demande.setDatedemande(LocalDateTime.now());
-                demande.setDatetraitement(LocalDateTime.now());
-                demande.setValidite(true);
-                demande.setObjetdemande("Demande de non-appartenance á la Fonction Publique");
-                demande.setDescriptiondemande("Description de la demande");
-
-                return demandeRepository.save(demande).getId();
-            } else {
-                return null;
-            }
         }
         return null;
     }
 
-    public Boolean isValidDemande(Demande demande){
-        if(demande.getDatedemande()!=null && demande.getNin() != null && demande.getNumerodemande()!=null && demande.getStatut() != null){
-            return false;
+    /**
+     * create demande
+     *
+     * @param id
+     * @return
+     * @throws IOException
+     * @throws WriterException
+     */
+    @Override
+    public Integer creerDemande(int id) throws IOException, WriterException {
+        Optional<Demandeur> demandeur = demandeurRepository.findById(id);//.orElseThrow(() -> new EntityNotFoundException("Pas de demandeur cet ID " + id));
+        if (!demandeur.isPresent()) {
+            throw new EntityNotFoundException("NOT_FOUND");
         }
-        return true;
+        Demande demande = new Demande();
+        demande.setDemandeur(demandeur.get());
+        demande.setStatut(StatusDemande.DEMANDE_EN_COURS.getStatut());
+        demande.setDatedemande(LocalDateTime.now());
+        demande.setDatetraitement(LocalDateTime.now());
+        demande.setValidite(true);
+        demande.setObjetdemande(TypeDemande.DEMANDE_NON_APP.getStatut());
+        demande.setDescriptiondemande("Description de la demande");
+
+        return demandeRepository.save(demande).getId();
     }
-    public DemandeDTO convertToDTO(Demande demande){
+
+    /**
+     * Convert entity demande to dto demande
+     *
+     * @param demande
+     * @return
+     */
+
+    public DemandeDTO convertToDTO(Demande demande) {
         return DemandeDTO.builder()
                 .validite(demande.isValide())
                 .demandeurDTO(demandeurService.convertToDTO(demande.getDemandeur()))
@@ -92,46 +108,52 @@ public class DemandeServiceImpl implements DemandeService {
                 .attestaionName(demande.getAttestationName())
                 .build();
     }
-    @Override
-    public List<DemandeDTO> findAllDemande() throws IOException, WriterException {
 
-        List<DemandeDTO> DTO = demandeRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
-        if (DTO.size() != 0) {
-            for (DemandeDTO dto : DTO) {
-                Utilisateur utils = new Utilisateur();
-                BeanUtils.copyProperties(dto, utils);
-                certificationServiceImpl.generatedQRCode(utils.getId());
-
-                Certification certification = new Certification();
-                certification.setCode(certificationServiceImpl.generatedQRCode(utils.getId()));
-                certification.setType("QRCode");
-
-                certificationRepository.save(certification);
-
-                Optional<Demande> optionalDemande = demandeRepository.findById(dto.getId());
-                Optional<Certification> optionalCertification = certificationRepository.findById(certification.getId());
-                if(optionalDemande.isPresent()){
-
-                    optionalDemande.get().setCertification(certification);
-                    demandeRepository.save(optionalDemande.get());
-
-                    optionalCertification.get().setDemande(optionalDemande.get());
-                    certificationRepository.save(optionalCertification.get());
-
-                }
-                return demandeRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
-            }
-        }
-        return DTO;
+    /**
+     * Convert dto demande to entity demande
+     *
+     * @param demande
+     * @return
+     */
+    public Demande convertToEntity(DemandeDTO demande) {
+        return Demande.builder()
+                .validite(demande.isValidite())
+                .datedemande(demande.getDatedemande())
+                .datetraitement(demande.getDatetraitement())
+                .descriptiondemande(demande.getDescriptiondemande())
+                .id(demande.getId())
+                .numerodemande(demande.getNumerodemande())
+                .objetdemande(demande.getObjetdemande())
+                .statut(demande.getStatut())
+                .urlattestation(demande.getUrlattestation())
+                .attestationName(demande.getAttestaionName())
+                .demandeur(Demandeur.builder()
+                        .id(demande.getDemandeurDTO().getId())
+                        .build())
+                .build();
     }
+
+    /**
+     * liste of demandes by status
+     *
+     * @param status
+     * @return
+     */
 
     @Override
     public List<DemandeDTO> findByStatut(String status) {
         return demandeRepository.findByStatut(status).stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
+    /**
+     * get demande by Id demandeur
+     *
+     * @param id
+     * @return
+     */
+
     @Override
-    public List<DemandeDTO> findByDemandeurId(int id){
+    public List<DemandeDTO> findByDemandeurId(int id) {
         return demandeRepository.findByDemandeurId(id).stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 

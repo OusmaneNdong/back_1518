@@ -1,32 +1,21 @@
 package com.fonctionpublique.services.dashbord;
 
 import com.fonctionpublique.dto.DemandeDTO;
-import com.fonctionpublique.dto.DemandeurDTO;
-import com.fonctionpublique.entities.Demandeur;
 import com.fonctionpublique.enumpackage.StatusDemande;
-import com.fonctionpublique.repository.DemandeRepository;
-import com.fonctionpublique.repository.DemandeurRepository;
-import com.fonctionpublique.repository.UtilisateurRepository;
 import com.fonctionpublique.services.demande.DemandeServiceImpl;
-import com.fonctionpublique.services.demandeur.DemandeurServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
-public class DashbordServiceImpl  implements DashbordService {
+public class DashbordServiceImpl implements DashbordService {
 
-    private final DemandeurServiceImpl demandeurServiceImpl;
-    private final DemandeRepository demandeRepository;
+
     private final DemandeServiceImpl demandeService;
 
     @Override
@@ -40,6 +29,7 @@ public class DashbordServiceImpl  implements DashbordService {
         List<DemandeDTO> demades = demandeService.findByStatut(StatusDemande.DEMANDE_TRAITEE.getStatut());
         return new ResponseEntity<>(demades.size(), HttpStatus.OK);
     }
+
     @Override
     public ResponseEntity<Integer> getRejected() {
         List<DemandeDTO> demades = demandeService.findByStatut(StatusDemande.DEMANDE_REFUSEE.getStatut());

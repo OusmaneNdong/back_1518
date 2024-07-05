@@ -22,7 +22,7 @@ public class PasswordResetToken {
     private Long token_id;
     private String token;
     private Date expirationTime;
-    private static final int EXPIRATION_TIME = 65;
+    private static final int EXPIRATION_TIME = 15;
     @OneToOne
     @JoinColumn(name = "user_id")
     private Utilisateur user;

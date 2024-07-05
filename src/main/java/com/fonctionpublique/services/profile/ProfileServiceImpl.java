@@ -50,7 +50,7 @@ public class ProfileServiceImpl implements ProfileService {
                 utilisateur.setEmail("admin@gmail.com");
                 utilisateur.setPassword(passwordEncoder.encode("passer"));
                 utilisateur.setNin("1570199800234");
-                utilisateur.setStatut("true");
+                utilisateur.setStatut(true);
                 utilisateur.setSignature("/Users/7maksacodpc/Downloads/cachet_sane.png");
                 utilisateur.setProfile(adminProfile);
                 utilisateurRepository.save(utilisateur);
@@ -61,7 +61,7 @@ public class ProfileServiceImpl implements ProfileService {
                 utilisateur1.setEmail("admin1@gmail.com");
                 utilisateur1.setPassword(passwordEncoder.encode("passer"));
                 utilisateur1.setNin("1234567890987");
-                utilisateur1.setStatut("true");
+                utilisateur1.setStatut(true);
                 utilisateur1.setSignature("/Users/7maksacodpc/Downloads/a1.jpeg");
                 utilisateur1.setProfile(adminProfile);
                 utilisateurRepository.save(utilisateur1);

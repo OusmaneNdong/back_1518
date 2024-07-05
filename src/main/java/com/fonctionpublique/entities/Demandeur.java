@@ -1,14 +1,11 @@
 package com.fonctionpublique.entities;
 
-import com.fonctionpublique.repository.DemandeurRepository;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -27,6 +24,7 @@ public class Demandeur {
     private String adresse;
     private String sexe;
     private String fonction;
+    @Column(unique = true)
     private String nin;
     private String scannernin;
     private String statut;
@@ -36,16 +34,15 @@ public class Demandeur {
     @OneToMany
     private List<Demande> demande;
 
-    public boolean isCompleted(){
+    public boolean isCompleted() {
         if (telephone == null || datedenaissance == null || lieudenaissance == null
-            || adresse == null || sexe ==null || fonction == null || nin == null
-            || scannernin == null || statut == null){
-            return  false;
+                || adresse == null || sexe == null || fonction == null || nin == null
+                || scannernin == null || statut == null) {
+            return false;
         }
         return true;
 
     }
-
 
 
 }

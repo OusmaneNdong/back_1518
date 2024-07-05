@@ -2,140 +2,108 @@ package com.fonctionpublique.services.utilisateur;
 
 import com.fonctionpublique.access.AuthenticationRequest;
 import com.fonctionpublique.access.RegistrationRequest;
-import com.fonctionpublique.access.token.VerificationToken;
-import com.fonctionpublique.access.token.VerificationTokenRepository;
+import com.fonctionpublique.access.password.PasswordResetToken;
+import com.fonctionpublique.config.JwtService;
 import com.fonctionpublique.dto.UtilisateurDTO;
-import com.fonctionpublique.entities.Certification;
-import com.fonctionpublique.entities.Demandeur;
 import com.fonctionpublique.entities.Profile;
 import com.fonctionpublique.entities.Utilisateur;
+import com.fonctionpublique.exception.*;
 import com.fonctionpublique.handleException.EmailAlreadyExistException;
 import com.fonctionpublique.handleException.NinAlreadyExistException;
-import com.fonctionpublique.mailing.InscriptionMailSender;
-import com.fonctionpublique.mailing.PasswordMail;
-import com.fonctionpublique.repository.DemandeurRepository;
+import com.fonctionpublique.repository.PasswordResetTokenRepository;
 import com.fonctionpublique.repository.ProfileRepository;
 import com.fonctionpublique.repository.UtilisateurRepository;
-import com.fonctionpublique.security.JwtUtilisateur;
-import com.fonctionpublique.services.certification.CertificationServiceImpl;
 import com.fonctionpublique.services.demandeur.DemandeurServiceImpl;
-import com.fonctionpublique.services.password.PasswordResetTokenService;
-import com.fonctionpublique.utils.UtilisateurUtil;
+import com.fonctionpublique.validators.ObjectValidator;
 import com.google.zxing.WriterException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class UtilisateurServiceImpl implements UtilisateurService {
-    
-    private final VerificationTokenRepository tokenRepository;
-    private final PasswordMail passwordMail;
+
     private final UtilisateurRepository utilisateurRepository;
     private final PasswordEncoder passwordEncoder;
-    private final DemandeurRepository demandeurRepository;
     private final ProfileRepository profileRepository;
-    private final InscriptionMailSender inscriptionMailSender;
-    private final JwtUtilisateur jwtUtilisateur;
-    private final UtilisateurUtil utilisateurUtil;
+    private final JwtService utilisateurUtil;
     private final AuthenticationManager authenticationManager;
-    private final PasswordResetTokenService passwordResetTokenService;
-    private final CertificationServiceImpl certificationServiceImpl;
     private final DemandeurServiceImpl demandeurService;
+    private final ObjectValidator<RegistrationRequest> validator;
+    private final PasswordResetTokenRepository resetTokenRepository;
 
+    /**
+     * find utilisateur by id
+     *
+     * @param id
+     * @return
+     */
     @Override
     public UtilisateurDTO getById(int id) {
         return convertDTO(utilisateurRepository.findById(id).orElse(null));
     }
-    private UtilisateurDTO convertToDTO(Utilisateur utilisateur){
+
+    /**
+     * Convert entity to dto
+     *
+     * @param utilisateur
+     * @return
+     */
+    private UtilisateurDTO convertToDTO(Utilisateur utilisateur) {
 
         UtilisateurDTO utilisateurDTO = new UtilisateurDTO();
         utilisateurDTO.setId(utilisateur.getId());
         utilisateurDTO.setPrenom(utilisateur.getPrenom());
         utilisateurDTO.setNom(utilisateur.getNom());
         utilisateurDTO.setEmail(utilisateur.getEmail());
-        utilisateurDTO.setPassword(utilisateur.getPassword());
         utilisateurDTO.setNin(utilisateur.getNin());
         utilisateurDTO.setPassPort(utilisateur.getPassPort());
         return utilisateurDTO;
     }
-    @Override
-    public void roleExisting() {
 
-        Profile adminRole = new Profile();
-        adminRole.setCode("Admin");
-        adminRole.setLibelle("Admin Profile");
-        adminRole.setEtat("true");
-        profileRepository.save(adminRole);
+    /**
+     * Convert dto to entity
+     *
+     * @param utilisateur
+     * @return
+     */
+    private Utilisateur convertToEntity(UtilisateurDTO utilisateur) {
 
-        Profile userRole = new Profile();
-        userRole.setCode("user");
-        userRole.setLibelle("Role par default de l'utilisateur");
-        userRole.setEtat("true");
-        profileRepository.save(userRole);
+        return Utilisateur.builder()
+                .id(utilisateur.getId())
+                .nom(utilisateur.getNom())
+                .prenom(utilisateur.getPrenom())
+                .nin(utilisateur.getNin())
+                .email(utilisateur.getEmail())
+                .statut(utilisateur.isStatut())
+                .build();
+
     }
-    @Override
-    public boolean creerUtilisateur(UtilisateurDTO utilisateurDTO) {
 
-        if (utilisateurRepository.existsByEmail(utilisateurDTO.getEmail())) {
-            return false;
-        }
-        if (utilisateurRepository.existsByNin(utilisateurDTO.getNin())) {
-            return false;
-        }
-
-        Utilisateur utilisateur = new Utilisateur();
-        BeanUtils.copyProperties(utilisateurDTO, utilisateur);
-
-        String hashPassword = passwordEncoder.encode(utilisateurDTO.getPassword());
-        utilisateur.setPassword(hashPassword);
-
-        utilisateur.setStatut("true");
-
-        Profile profile = findOrCreateProfile("user");
-        utilisateur.setProfile(profile);
-
-//        inscriptionMailSender.sendMailToAllAdmin(utilisateur.isStatus(), utilisateur.getEmail(), utilisateurRepository.getAllAdmin());
-
-        utilisateurRepository.save(utilisateur);
-
-        Demandeur demandeur = new Demandeur();
-        demandeur.setUtilisateur(utilisateur);
-        demandeur.setNin(utilisateur.getNin());
-        demandeurRepository.save(demandeur);
-        utilisateur.setDemandeur(demandeur);
-        return true;
-    }
-    @Override
-    public Optional<Utilisateur> findByUtilisateur(int id) {
-        return Optional.empty();
-    }
-    @Override
-    public Optional<Utilisateur> findByUtilisateur(String email) {
-        return utilisateurRepository.findByEmail(email);
-    }
-    public UtilisateurDTO convertDTO(Utilisateur utilisateur){
+    /**
+     * Convert entity to dto
+     *
+     * @param utilisateur
+     * @return
+     */
+    public UtilisateurDTO convertDTO(Utilisateur utilisateur) {
 
         return UtilisateurDTO.builder()
                 .id(utilisateur.getId())
                 .prenom(utilisateur.getPrenom())
                 .nom(utilisateur.getNom())
                 .email(utilisateur.getEmail())
-                .password(utilisateur.getPassword())
                 .nin(utilisateur.getNin())
-                .statut(utilisateur.getStatut())
+                .statut(utilisateur.isStatut())
                 .fullName(utilisateur.getFullName())
                 .demandeurDTO(demandeurService.convertToDTO(utilisateur.getDemandeur()))
                 .signature(utilisateur.getSignature())
@@ -143,28 +111,27 @@ public class UtilisateurServiceImpl implements UtilisateurService {
                 .typePieces(utilisateur.getTypePieces())
                 .build();
     }
-    private UtilisateurDTO convertUtilisateurToDTO(Utilisateur utilisateur) {
 
-        UtilisateurDTO utilisateurDTO = new UtilisateurDTO();
-
-        utilisateurDTO.setId(utilisateur.getId());
-        utilisateurDTO.setPrenom(utilisateur.getPrenom());
-        utilisateurDTO.setNom(utilisateur.getNom());
-        utilisateurDTO.setEmail(utilisateur.getEmail());
-        utilisateurDTO.setPassword(utilisateur.getPassword());
-        utilisateurDTO.setNin(utilisateur.getNin());
-        utilisateurDTO.setStatut(utilisateur.getStatut());
-        utilisateurDTO.setPassword(utilisateur.getSignature());
-
-        return utilisateurDTO;
-    }
+    /**
+     * List of users
+     *
+     * @return
+     * @throws IOException
+     * @throws WriterException
+     */
     @Override
     public List<UtilisateurDTO> findAll() throws IOException, WriterException {
-       return utilisateurRepository.findAll().stream().map(this::convertDTO).collect(Collectors.toList());
+        return utilisateurRepository.findAll().stream().map(this::convertDTO).collect(Collectors.toList());
     }
+
+    /**
+     * find profil by profileName if exist else create it
+     *
+     * @param profileName
+     * @return
+     */
     private Profile findOrCreateProfile(String profileName) {
-        Profile profile = profileRepository.findByCode(profileName)
-                .orElse(null);
+        Profile profile = profileRepository.findByCode(profileName).orElse(null);
         if (profile == null) {
             return profileRepository.save(
                     Profile.builder()
@@ -175,8 +142,21 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         }
         return profile;
     }
+
+    /**
+     * register user
+     *
+     * @param registrationRequest
+     * @return
+     * @throws IOException
+     * @throws WriterException
+     */
     @Override
-    public Utilisateur registerUtilisateur(RegistrationRequest registrationRequest) throws IOException, WriterException {
+    public AuthenticationResponse registerUtilisateur(RegistrationRequest registrationRequest) throws IOException, WriterException {
+        validator.validate(registrationRequest);
+        if (utilisateurRepository.existsByEmail(registrationRequest.getEmail()) && utilisateurRepository.existsByNin(registrationRequest.getNin())) {
+            throw new EmailAndNinAlreadyExistException("EMAIL_NIN_EXIST");
+        }
         if (utilisateurRepository.existsByEmail(registrationRequest.getEmail())) {
             throw new EmailAlreadyExistException("email exist");
         }
@@ -184,181 +164,133 @@ public class UtilisateurServiceImpl implements UtilisateurService {
             throw new NinAlreadyExistException("nin exist");
         }
 
-        Utilisateur utilisateur = new Utilisateur();
-        String hashPassword = passwordEncoder.encode(registrationRequest.getPassword());
-        utilisateur.setPassword(hashPassword);
-
-//        String civilite = demandeur.getSexe().equalsIgnoreCase("Masculin") ? "Monsieur" : "Madame";
-
-        String identityNin = "^[e0-9]{10,10}$";
-        String identityPassport = "^[e0-9]{10,10}$";
-//        String identityNinOrPassport = utilisateur.getTypePieces().equalsIgnoreCase("nin") ? identityNin : identityPassport;
-
-
-
-        Profile profile = findOrCreateProfile("user");
-        utilisateur.setNin(registrationRequest.getNin());
-        utilisateur.setEmail(registrationRequest.getEmail());
-        utilisateur.setNom(registrationRequest.getNom());
-        utilisateur.setPrenom(registrationRequest.getPrenom());
-        utilisateur.setStatut("true");
-//        utilisateur.setTypePieces(identityNinOrPassport);
-//      utilisateur.setPassePort(registrationRequest.getPassePort());
-        utilisateur.setProfile(profile);
-
+        Utilisateur utilisateur = RegistrationRequest.convertToEntity(registrationRequest);
+        utilisateur.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
+        utilisateur.setStatut(true);
+        utilisateur.setProfile(findOrCreateProfile("user"));
         utilisateurRepository.save(utilisateur);
-        List<UtilisateurDTO> DTO = utilisateurRepository.findAll().stream().map(this::convertUtilisateurToDTO).collect(Collectors.toList());
-        if( DTO.size() != 0){
-            for(UtilisateurDTO dto : DTO){
-                Utilisateur utils = new Utilisateur();
-                BeanUtils.copyProperties(dto,utils);
-                certificationServiceImpl.generatedQRCode(utils.getId());
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", utilisateur.getId());
+        claims.put("email", utilisateur.getEmail());
+        claims.put("nin", utilisateur.getNin());
+        claims.put("fullName", utilisateur.getFullName());
+        claims.put("profile", utilisateur.getProfile().getCode());
+        String token = utilisateurUtil.generateToken(utilisateur, claims);
 
-                Certification certification = new Certification();
-                certification.setCode(certificationServiceImpl.generatedQRCode(dto.getId()));
-                certification.setType("QRCODE");
-
-            }
-        }
-
-//        Utilisateur utilisateur1 = new Utilisateur(1,"ousmane","Ndong","ndongmafale10@gmail.com","passer","1570197700123","true",null,null,profile);
-
-
-
-        inscriptionMailSender.sendMailToAllAdmin(registrationRequest.getStatus(), registrationRequest.getEmail(), utilisateurRepository.getAllAdmin());
-
-
-            return utilisateur;
+        return AuthenticationResponse.builder()
+                .token(token)
+                .build();
     }
-    @Override
-    public ResponseEntity<?> connexion(UtilisateurDTO registrationRequest) {
-        Optional<Utilisateur> u = utilisateurRepository.findByEmail(registrationRequest.getEmail());
-        String cni="";
-        if (u.isPresent()){
-            cni = u.get().getNin();
-        }        try {
-            Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(registrationRequest.getEmail(), registrationRequest.getPassword()));
-           if(auth.isAuthenticated()) {
-               UserDetails userDetails = jwtUtilisateur.loadUserByUsername(registrationRequest.getEmail());
-               String token = utilisateurUtil.generateToken(userDetails.getUsername(),cni);
-               return ResponseEntity.ok(token);
-           }
-        } catch (Exception ex) {
-            log.error("Error occurred during authentication: {}", ex.getMessage());
-        }
-        return ResponseEntity.badRequest().body("Authentication failed");
-    }
+
+    /**
+     * Authentication
+     *
+     * @param registrationRequest
+     * @return
+     */
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest registrationRequest) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(registrationRequest.getEmail(), registrationRequest.getPassword())
         );
         final Utilisateur user = utilisateurRepository.findByEmail(registrationRequest.getEmail()).get();
-        UserDetails userDetails = jwtUtilisateur.loadUserByUsername(registrationRequest.getEmail());
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", user.getId());
         claims.put("email", user.getEmail());
         claims.put("nin", user.getNin());
-        claims.put("fullName", user.getPrenom()+" "+user.getNom());
-        claims.put("profile",user.getProfile().getCode());
-        String token = utilisateurUtil.generateToken(userDetails.getUsername(),claims);
+        claims.put("fullName", user.getPrenom() + " " + user.getNom());
+        claims.put("profile", user.getProfile().getCode());
+        String token = utilisateurUtil.generateToken(user, claims);
 
         return AuthenticationResponse.builder()
-                        .token(token)
-                        .build();
+                .token(token)
+                .build();
 
 
     }
+
+    /**
+     * changement de mot de passe
+     *
+     * @param email
+     * @param oldPassword
+     * @param newPassword
+     * @param confirm
+     */
     @Override
-    public void saveUserVerificationToken(Utilisateur user, String token) {
-        var verificationToken = new VerificationToken(token, user);
-        tokenRepository.save(verificationToken);
-    }
-    @Override
-    public void changePassword(Utilisateur user, String newPassword) {
-        if (newPassword != null) {
-            user.setPassword(passwordEncoder.encode(newPassword));
-            utilisateurRepository.save(user);
-        } else {
-            throw new IllegalArgumentException("New password cannot be null");
+    public Integer changePassword(String email, String oldPassword, String newPassword, String confirm) {
+
+        Optional<Utilisateur> utilisateur = utilisateurRepository.findByEmail(email);
+        if (!utilisateur.isPresent()) {
+            throw new EmailNotExistException("Email not exist");
         }
+
+        if (!oldPasswordIsValid(utilisateur.get(), oldPassword)) {
+            throw new NotMatchPasswordOldException("L'ancien mot de passe saisi n'est pas correct");
+        }
+
+        if (!newPassword.equals(confirm)) {
+            throw new NotMatchPasswordException("Le nouveua mot de passe et la confirmation ne correspond pas");
+        }
+
+        utilisateur.get().setPassword(passwordEncoder.encode(newPassword));
+        return utilisateurRepository.save(utilisateur.get()).getId();
     }
+
+    /**
+     * Verify if old password match the typing password
+     *
+     * @param utilisateur
+     * @param oldPassword
+     * @return
+     */
     @Override
     public boolean oldPasswordIsValid(Utilisateur utilisateur, String oldPassword) {
-        return  passwordEncoder.matches(oldPassword,utilisateur.getPassword());
+        return passwordEncoder.matches(oldPassword, utilisateur.getPassword());
     }
-    @Override
-    public String validateToken(String theToken) {
-        VerificationToken token = tokenRepository.findByToken(theToken);
-        if(token == null){
-            return "Invalid verification token";
-        }
-        Utilisateur user = token.getUser();
-        Calendar calendar = Calendar.getInstance();
-        if ((token.getExpirationTime().getTime() - calendar.getTime().getTime()) <= 0){
-            tokenRepository.delete(token);
-            return "Token already expired";
-        }
-        utilisateurRepository.save(user);
-        return "valid";
-    }
+
+    /**
+     * find user by email
+     *
+     * @param email
+     * @return
+     */
     @Override
     public Optional<Utilisateur> findByEmail(String email) {
         return utilisateurRepository.findByEmail(email);
     }
-    @Override
-    public Optional<Utilisateur> getByStatut(String statut) {
-            return utilisateurRepository.findByStatut(statut);
-    }
-    @Override
-    public void createPasswordResetTokenForUser(Utilisateur utilisateur, String passwordResetToken) {
-            passwordResetTokenService.createPasswordResetTokenForUser(utilisateur, passwordResetToken);
-    }
-    @Override
-    public String validatePasswordResetToken(String token) {
-        return passwordResetTokenService.validatePasswordResetToken(token);
-    }
-    @Override
-    public Utilisateur findUserByPasswordToken(String token) {
-        return passwordResetTokenService.findUserByPasswordToken(token).get();
-    }
-    public void resetUtilisateurPassword(Utilisateur user,String newPassword){
-        user.setPassword(passwordEncoder.encode(newPassword));
-        utilisateurRepository.save(user);
-    }
-    @Override
-    public UtilisateurDTO changePassword(String email, String newPassword) {
-        Utilisateur u = utilisateurRepository.findByEmail(email).orElse(null);
-        if (u !=null){
-            u.setPassword(passwordEncoder.encode(newPassword));
-           u= utilisateurRepository.save(u);
-        }
-        UtilisateurDTO uDTO = new UtilisateurDTO();
-        BeanUtils.copyProperties(u,uDTO);
-        return uDTO;
-    }
-    @Override
-    public String forgetPassword(String email) {
-        Utilisateur user =  utilisateurRepository.findByEmail(email)
-                .orElseThrow(
-                        () -> new RuntimeException("email introuvable" + email));
-        passwordMail.sentSetPasswordEmail(email);
 
-        Map<String,Object> claims = new HashMap<>();
-        claims.put("email", user.getEmail());
-        String token = utilisateurUtil.generateToken(email,claims);
-        return token;
-    }
-     @Override
-    public UtilisateurDTO setPassword(String email, String newPassword) {
-         Utilisateur user =  utilisateurRepository.findByEmail(email)
-                 .orElseThrow(
-                         () -> new RuntimeException("email introuvable" + email));
-         user.setPassword(passwordEncoder.encode(newPassword));
-         utilisateurRepository.save(user);
-         UtilisateurDTO dto = new UtilisateurDTO();
-         BeanUtils.copyProperties(user,dto);
-         return dto;
+
+    /**
+     * Reset password
+     *
+     * @param token
+     * @param newPassword
+     * @param confirmPassword
+     * @return UtilisateurDTO
+     */
+    @Override
+    public Integer resetPassword(String token, String newPassword, String confirmPassword) {
+
+        PasswordResetToken verification = resetTokenRepository.findByToken(token);
+        if (verification == null) {
+            throw new InvalidTokenException("Invalid token");
+        }
+        Utilisateur utilisateur = verification.getUser();
+        Calendar calendar = Calendar.getInstance();
+        System.out.println("expires " + verification.getTokenExpirationTime() + "current" + calendar.getTime());
+        //if (verification.getTokenExpirationTime().getTime()-calendar.getTime().getTime()<=0){
+        if (verification.getTokenExpirationTime().before(calendar.getTime())) {
+            resetTokenRepository.delete(verification);
+            throw new ExpirationTokenException("expired token");
+        }
+        if (!newPassword.equals(confirmPassword)) {
+            throw new NotMatchPasswordException("not conform");
+        }
+        utilisateur.setPassword(passwordEncoder.encode(newPassword));
+        return utilisateurRepository.save(utilisateur).getId();
+
+
     }
 }
 

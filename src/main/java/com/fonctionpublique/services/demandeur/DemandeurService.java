@@ -10,15 +10,8 @@ import java.util.Optional;
 
 public interface DemandeurService {
     DemandeurDTO getByNin(String nin);
-
-    Optional<Demandeur> getByStatut(String statut);
-
     DemandeurDTO getById(int id);
-
-    DemandeurDTO getByUserId(String nin);
-
     public List<DemandeurDTO> findAll();
-    DemandeurDTO update(DemandeurDTO demandeurDTO);
 
 
 }

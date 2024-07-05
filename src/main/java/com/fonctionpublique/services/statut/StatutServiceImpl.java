@@ -1,15 +1,11 @@
 package com.fonctionpublique.services.statut;
 
 import com.fonctionpublique.entities.Demande;
-import com.fonctionpublique.entities.Demandeur;
-import com.fonctionpublique.entities.Structure;
-import com.fonctionpublique.entities.Utilisateur;
 import com.fonctionpublique.enumpackage.StatusDemande;
 import com.fonctionpublique.mailing.StatutMail;
 import com.fonctionpublique.repository.DemandeRepository;
-import com.fonctionpublique.repository.DemandeurRepository;
 import com.fonctionpublique.repository.UtilisateurRepository;
-import com.fonctionpublique.services.attestation.AttestationServiceImpl;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -23,38 +19,27 @@ import java.util.Optional;
 public class StatutServiceImpl implements StatutService {
 
     private final UtilisateurRepository utilisateurRepository;
-    private final DemandeurRepository demandeurRepository;
     private final DemandeRepository demandeRepository;
     private final StatutMail statutMail;
 
+
+
+    /**
+     * send mail reject demande
+     *
+     * @param id
+     * @return
+     */
     @Override
-    public String approuvedStatut(Utilisateur u, Demandeur d, Demande dm, Structure s) throws FileNotFoundException {
-        Optional<Utilisateur> optional = utilisateurRepository.findByEmail(u.getEmail());
-                if(optional.isPresent()){
-                    statutMail.sentMailApprouved(u,d, dm, s);
-                }else {
-                    System.out.println("email introuvable");
-                }
-                return "approuved mail sent successfully !";
-    }
-    public String rejetedStatut(Integer id)  {
-        //Optional<Utilisateur> optional = utilisateurRepository.findByEmail(email);
+    public Integer rejetedStatut(Integer id) {
         Optional<Demande> demande = demandeRepository.findById(id);
-
-        if(demande.isPresent()){
-            Demandeur demandeur = demande.get().getDemandeur();
-            statutMail.sentMailRejeted(demandeur);
-
-            //Optional<Demandeur> optionalDemandeur  = demandeurRepository.findById(optional.get().getDemandeur().getId());
-            //if(optionalDemandeur.isPresent()){
-               // Demandeur demandeur = demande.get().getDemandeur();
-                demande.get().setStatut(StatusDemande.DEMANDE_REFUSEE.getStatut());
-                demandeRepository.save(demande.get());
-            //}
-        }else {
-            System.out.println("email introuvable");
+        if (!demande.isPresent()) {
+            throw new EntityNotFoundException("NOT_FOUND");
         }
-        return "rejected mail sent successfully !";
+        statutMail.sentMailRejeted(demande.get().getDemandeur());
+        demande.get().setStatut(StatusDemande.DEMANDE_REFUSEE.getStatut());
+        demandeRepository.save(demande.get());
+        return demande.get().getId();
     }
 
 }

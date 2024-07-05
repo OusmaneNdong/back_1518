@@ -21,10 +21,8 @@ public class VerificationToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String token;
-//    private String email;
-//    private String nin;
     private Date expirationTime;
-    private static final int EXPIRATION_TIME = 65;
+    private static final int EXPIRATION_TIME = 30;
 
     @OneToOne
     @JoinColumn(name = "utilisaser_id")

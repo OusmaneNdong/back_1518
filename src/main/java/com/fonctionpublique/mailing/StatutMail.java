@@ -38,11 +38,11 @@ public class StatutMail {
 
     private final JavaMailSender javaMailSender;
     private final UtilisateurRepository utilisateurRepository;
-    public void sentMailApprouved(Utilisateur u, Demandeur d, Demande dm, Structure s) {
+    public void sentMailApprouved(Utilisateur u, Demande dm) {
         try {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
-            mimeMessageHelper.setTo(u.getEmail());
+            mimeMessageHelper.setTo(dm.getDemandeur().getUtilisateur().getEmail());
             mimeMessageHelper.setSubject("Ministére de la fonction public et de la Réforme du Secteur Public.");
 //            String url = "http://localhost:4200/setPassword/" + token;
             mimeMessageHelper.setText(
@@ -50,14 +50,14 @@ public class StatutMail {
                             "src=\"http://res.cloudinary.com/dpdwdstqt/image/upload/v1524010315/senegalflag.png\"\n" +
                             "style=\"border:0;display:block;outline:none;text-decoration:none;height:auto;width:15%;margin-left: 25%\"\n" +
                             "width=\"15\">" +
-                            "<h2>Bonjour</h2> " + ":" + u.getFullName() +
+                            "<h2>Bonjour</h2> " + ":" + dm.getDemandeur().getUtilisateur().getFullName() +
                             "<i style=\"font-size: .9rem\"> La réponse suite à votre demande: </i> <br> <br>\n" +
                             "<h5>Date de la demande</h5> :" +
                             "<h5>Object de la demande</h5> :" +
                             "<b>Votre demande a été validée.</b>" +
                             "<p>Voici en dessous votre attestation en fichier pdf.</p>" +
                             "<p>Cette attestation est egalement disponible dans votre espace personnel oú serez en mesure de l'utiliser tand qu'elle reste valid,</p>" +
-                            "<a href=\"#\" target=\\\"_blank\\\">click pour donner votre avis</a>\"".formatted(u.getEmail()), true);
+                            "<a href=\"#\" target=\\\"_blank\\\">click pour donner votre avis</a>\"".formatted(dm.getDemandeur().getUtilisateur().getEmail()), true);
 
             File file = new File("/Users/7maksacodpc/Downloads/attestations/" + dm.getAttestationName());
                 if (file.exists()) {
