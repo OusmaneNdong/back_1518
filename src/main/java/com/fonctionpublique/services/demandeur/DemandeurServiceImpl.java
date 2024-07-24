@@ -6,28 +6,35 @@ import com.fonctionpublique.entities.Utilisateur;
 import com.fonctionpublique.enumpackage.StatusDemande;
 import com.fonctionpublique.repository.DemandeurRepository;
 import com.fonctionpublique.repository.UtilisateurRepository;
+import com.fonctionpublique.services.demande.DemandeServiceImpl;
+import com.fonctionpublique.services.utilisateur.UtilisateurServiceImpl;
 import com.fonctionpublique.validators.ObjectValidator;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
 @Service
+@RequiredArgsConstructor
 public class DemandeurServiceImpl implements DemandeurService {
 
     private final DemandeurRepository demandeurRepository;
     private final UtilisateurRepository utilisateurRepository;
     private final ObjectValidator<DemandeurDTO> validator;
 
+
+    @Override
     public int creerDemandeur(DemandeurDTO demandeurDTO) {
         validator.validate(demandeurDTO);
         Optional<Utilisateur> optionalUtilisateurs =
                 utilisateurRepository.findByNin(demandeurDTO.getNin());
-        if (!optionalUtilisateurs.isPresent()){
+        if (!optionalUtilisateurs.isPresent()) {
             throw new EntityNotFoundException("NOT_FOUND");
         }
         Demandeur demandeur = convertToEntity(demandeurDTO);
@@ -75,6 +82,8 @@ public class DemandeurServiceImpl implements DemandeurService {
                 .statut(demandeur.getStatut())
                 .fullName(demandeur.getUtilisateur().getFullName())
                 .isCompleted(demandeur.isCompleted())
+                .displayPicture(demandeur.getDisplayPicture())
+                .type(demandeur.getType())
                 .build();
 
     }
@@ -91,8 +100,23 @@ public class DemandeurServiceImpl implements DemandeurService {
                 .scannernin(demandeurDTO.getScannernin())
                 .sexe(demandeurDTO.getSexe())
                 .telephone(demandeurDTO.getTelephone())
+                .displayPicture(demandeurDTO.getDisplayPicture())
+                .type(demandeurDTO.getType())
                 .build();
+
     }
 
 
+    @Override
+    @Transactional
+    public Integer upadateDemandeur(DemandeurDTO demandeurDTO) {
+
+        Utilisateur utilisateur = demandeurRepository.findById(demandeurDTO.getId()).get().getUtilisateur();
+        utilisateur.setPrenom(demandeurDTO.getPrenom());
+        utilisateur.setNom(demandeurDTO.getNom());
+        utilisateur.setNin(demandeurDTO.getNin());
+        Demandeur demandeur = convertToEntity(demandeurDTO);
+        demandeur.setUtilisateur(utilisateur);
+        return demandeurRepository.save(demandeur).getId();
+    }
 }

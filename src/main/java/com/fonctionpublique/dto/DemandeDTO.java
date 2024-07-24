@@ -1,16 +1,13 @@
 package com.fonctionpublique.dto;
 
-import com.fonctionpublique.entities.Certification;
-import com.fonctionpublique.entities.Demande;
-import com.fonctionpublique.entities.Utilisateur;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Transient;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 @Data
 @Builder
 @AllArgsConstructor
@@ -21,13 +18,17 @@ public class DemandeDTO {
     private String urlattestation;
     private String statut;
     private String numerodemande;
+    @JsonFormat(pattern="dd-MM-yyyy")
     private LocalDateTime datedemande;
+    @JsonFormat(pattern="dd-MM-yyyy")
     private LocalDateTime datetraitement;
     private String attestaionName;
     private boolean validite;
     private String objetdemande;
     private String descriptiondemande;
     private CertificationDTO certificationDTO;
-    //private UtilisateurDTO utilisateurDTO;
     private DemandeurDTO demandeurDTO;
+    @JsonFormat(pattern="dd-MM-yyyy")
+    private LocalDate dateexpiration;
+
 }

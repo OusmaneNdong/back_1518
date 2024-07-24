@@ -166,7 +166,15 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.FORBIDDEN)
                 .body(representation);
     }
-
+    @ExceptionHandler(InvalidExtensionException.class)
+    public ResponseEntity<ExceptionRepresentation> handleInvaliExtensionException() {
+        ExceptionRepresentation representation = ExceptionRepresentation.builder()
+                .errorMessage("INVALID_EXTENTION")
+                .build();
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(representation);
+    }
 
 
 }

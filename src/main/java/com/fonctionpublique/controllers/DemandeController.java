@@ -29,7 +29,7 @@ public class DemandeController {
      * @throws WriterException
      */
     @PostMapping("/demandez/{id}")
-    public Integer demander(@PathVariable("id") int id) throws IOException, WriterException {
+    public Integer demander(@PathVariable("id") int id) {
         return demandeServiceImpl.creerDemande(id);
     }
 
@@ -45,6 +45,8 @@ public class DemandeController {
 
     }
 
+
+
     /**
      * get demandes by id demandeur
      *
@@ -54,6 +56,11 @@ public class DemandeController {
     @GetMapping("/findDemandeurById/{id}")
     public List<DemandeDTO> findByDemandeurId(@PathVariable("id") int id) {
         return demandeServiceImpl.findByDemandeurId(id);
+    }
+
+    @GetMapping("/attestation/{id}")
+    public String findAttestationName(@PathVariable("id") int id) {
+        return demandeServiceImpl.findAttestation(id);
     }
 
     /**
@@ -86,6 +93,7 @@ public class DemandeController {
     public List<DemandeDTO> findAllDemande(@PathVariable("statut") String statut) {
         return demandeServiceImpl.findByStatut(statut);
     }
+
 
 
 }

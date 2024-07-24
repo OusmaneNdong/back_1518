@@ -5,35 +5,31 @@ import com.fonctionpublique.entities.Demande;
 import com.fonctionpublique.entities.Demandeur;
 import com.fonctionpublique.enumpackage.StatusDemande;
 import com.fonctionpublique.enumpackage.TypeDemande;
-import com.fonctionpublique.repository.CertificationRepository;
 import com.fonctionpublique.repository.DemandeRepository;
 import com.fonctionpublique.repository.DemandeurRepository;
-import com.fonctionpublique.services.certification.CertificationServiceImpl;
 import com.fonctionpublique.services.demandeur.DemandeurServiceImpl;
-import com.fonctionpublique.validators.ObjectValidator;
 import com.google.zxing.WriterException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
+
 @Service
-@Slf4j
+@Component
+@RequiredArgsConstructor
 public class DemandeServiceImpl implements DemandeService {
 
     private final DemandeurRepository demandeurRepository;
     private final DemandeRepository demandeRepository;
-    private final CertificationServiceImpl certificationServiceImpl;
-    private final CertificationRepository certificationRepository;
     private final DemandeurServiceImpl demandeurService;
-    private final ObjectValidator<DemandeDTO> validator;
 
     /**
      * List all demandes
@@ -60,6 +56,18 @@ public class DemandeServiceImpl implements DemandeService {
         return null;
     }
 
+
+    /**
+     * get the expiration date
+     * @return
+     */
+    public LocalDate isExpired(){
+        LocalDate date = LocalDate.now();
+        LocalDate expiredDate = date.plusMonths(9);
+        return  expiredDate;
+    }
+
+
     /**
      * create demande
      *
@@ -69,8 +77,8 @@ public class DemandeServiceImpl implements DemandeService {
      * @throws WriterException
      */
     @Override
-    public Integer creerDemande(int id) throws IOException, WriterException {
-        Optional<Demandeur> demandeur = demandeurRepository.findById(id);//.orElseThrow(() -> new EntityNotFoundException("Pas de demandeur cet ID " + id));
+    public Integer creerDemande(int id) {
+        Optional<Demandeur> demandeur = demandeurRepository.findById(id);
         if (!demandeur.isPresent()) {
             throw new EntityNotFoundException("NOT_FOUND");
         }
@@ -82,6 +90,10 @@ public class DemandeServiceImpl implements DemandeService {
         demande.setValidite(true);
         demande.setObjetdemande(TypeDemande.DEMANDE_NON_APP.getStatut());
         demande.setDescriptiondemande("Description de la demande");
+        demandeur.get().setDemande(demande.getDemandeur().getDemande());
+        demande.setDateexpiration(isExpired());
+        demandeurRepository.save(demandeur.get());
+
 
         return demandeRepository.save(demande).getId();
     }
@@ -93,7 +105,7 @@ public class DemandeServiceImpl implements DemandeService {
      * @return
      */
 
-    public DemandeDTO convertToDTO(Demande demande) {
+    public  DemandeDTO convertToDTO(Demande demande) {
         return DemandeDTO.builder()
                 .validite(demande.isValide())
                 .demandeurDTO(demandeurService.convertToDTO(demande.getDemandeur()))
@@ -106,6 +118,7 @@ public class DemandeServiceImpl implements DemandeService {
                 .statut(demande.getStatut())
                 .urlattestation(demande.getUrlattestation())
                 .attestaionName(demande.getAttestationName())
+                .dateexpiration(demande.getDateexpiration())
                 .build();
     }
 
@@ -151,11 +164,16 @@ public class DemandeServiceImpl implements DemandeService {
      * @param id
      * @return
      */
-
     @Override
     public List<DemandeDTO> findByDemandeurId(int id) {
         return demandeRepository.findByDemandeurId(id).stream().map(this::convertToDTO).collect(Collectors.toList());
     }
+
+    @Override
+    public String findAttestation(int id) {
+        return demandeRepository.findAttestationById(id).getUrlattestation();
+    }
+
 
 
 }

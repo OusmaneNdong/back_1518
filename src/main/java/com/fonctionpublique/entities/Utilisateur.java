@@ -1,6 +1,10 @@
 package com.fonctionpublique.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,13 +23,21 @@ public class Utilisateur implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @NonNull
+    @NotBlank
     private String prenom;
+    @NonNull
+    @NotBlank
     private String nom;
     @Column(unique = true)
     private String email;
     private String password;
     private String typePieces;
-    @Column(unique = true)
+//    @Column(unique = true)
+//    @Max(value = 14 , message = "ce champs doit avoir maximun 14 chiffres")
+//    @Min(value = 13, message = "ce champs doit avoir au minumum 13 chiffres")
+//    @NonNull
+//    @NotBlank
     private String nin;
     private String passPort;
     private boolean statut;

@@ -12,6 +12,7 @@ public interface Params {
     public static final String DIRECTORYQRCOD = "/Users/7maksacodpc/Downloads/The_QRCode/";
 
 
-    public static final String LIENDEVERIFICATION = "https://localhost:4200/verificationattestation/";
+//    public static final String LIENDEVERIFICATION = "https://localhost:4200/verificationattestation/";
+    public static final String LIENDEVERIFICATION = "https://localhost:4200/verifierscan/";
     public static final String PREFIX = "Nº";
 }

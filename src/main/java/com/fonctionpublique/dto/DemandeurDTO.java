@@ -1,5 +1,8 @@
 package com.fonctionpublique.dto;
 
+import com.fonctionpublique.entities.Demande;
+import jakarta.persistence.Column;
+import jakarta.persistence.Lob;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -15,8 +18,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DemandeurDTO {
-    private int id;
 
+    private int id;
     @NotNull(message = "telephone ne doit pas etre null")
     @NotEmpty(message = "telephone ne doit pas etre null")
     @NotBlank(message = "telephone ne doit pas etre vide")
@@ -45,5 +48,7 @@ public class DemandeurDTO {
     private String fullName;
     private boolean isCompleted;
     private int userId;
-    private List<DemandeDTO> demandeDTO;
+    private Demande demandeDTO;
+    private byte[] displayPicture;
+    private String type;
 }

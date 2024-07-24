@@ -38,7 +38,7 @@ public class SecurityConfiguration {
                         "/api/utilisateur/forget-password",
                         "/api/utilisateur/password-reset-request",
                         "/api/utilisateur/reset-password",
-                        "/Users/7maksacodpc/Desktop/Attestation/Attestation/uploaded/documents/CNI.pdf",
+                        "/api//download/**",
                         "/api/access/**",
                         "/h2-console/**",
                         // resources for swagger to work properly
@@ -55,7 +55,10 @@ public class SecurityConfiguration {
                         "/webjars/**",
                         "/swagger-ui.html",
                        "/api/uploads/download/**",
-                       "/api/uploads/**"
+                       "/api/uploads/**",
+                        "/simple-form-upload-mvc",
+                        "/upload/**",
+                        "/user/**"
                 )
                 .permitAll()
                 .anyRequest()
@@ -71,15 +74,30 @@ public class SecurityConfiguration {
     }
 
 
+//    @Bean
+//    public CorsFilter corsFilter() {
+//        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        final CorsConfiguration config = new CorsConfiguration();
+//        config.setAllowCredentials(true);
+//        config.setAllowedOrigins(Arrays.asList("http://localhost:4200", "http://locahost:5300/node"));
+//        config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "Authorization"));
+//        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+//        source.registerCorsConfiguration("/**", config);
+//        return new CorsFilter(source);
+//    }
+
+    // If you are configuring CORS in securityFilterChain, you might not need this
     @Bean
     public CorsFilter corsFilter() {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         final CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList("http://localhost:4200", "http://locahost:5300/node"));
+        config.setAllowedOrigins(Arrays.asList("http://localhost:4200", "http://localhost:5300"));
         config.setAllowedHeaders(Arrays.asList("Origin", "Content-Type", "Accept", "Authorization"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
+
+
 }

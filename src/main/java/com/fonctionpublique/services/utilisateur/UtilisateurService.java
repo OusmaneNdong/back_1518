@@ -12,6 +12,8 @@ import java.util.Optional;
 
 public interface UtilisateurService {
 
+    UtilisateurDTO getByNin(String nin);
+
     List<UtilisateurDTO> findAll() throws IOException, WriterException;
     UtilisateurDTO getById(int id);
     AuthenticationResponse registerUtilisateur(RegistrationRequest registrationRequest) throws IOException, WriterException;

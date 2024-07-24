@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
@@ -91,6 +92,7 @@ public class AttestationServiceImpl implements AttestationService {
         imageDrapeau.setHeight(25);
 
         String urlLogoMinister = "/Users/7maksacodpc/Downloads/logominister.png";
+        //String urlLogoMinister = "src/main/java/ressources/images/logominister.png";
         ImageData logoMinistere = ImageDataFactory.create(urlLogoMinister);
         Image imageLogoMinister = new Image(logoMinistere);
         imageLogoMinister.setRelativePosition(55, -30, 0, 0);
@@ -112,10 +114,17 @@ public class AttestationServiceImpl implements AttestationService {
         Image imageQR = new Image(qR);
         imageQR.setRelativePosition(0, 160, 0, 0);
 
+
+
         demande.setUrlattestation(attestationName);
         demande.setAttestationName(attestationName);
         demande.setDatetraitement(LocalDateTime.now());
         demande.setStatut(StatusDemande.DEMANDE_TRAITEE.getStatut());
+
+        LocalDate databefore = LocalDate.now();
+        LocalDate dateAfter = databefore.plusMonths(9);
+
+        demande.setDateexpiration(dateAfter);
         demande.setNumerodemande(certificationService.generateAttestationNumber(demandeur.getId()));
         demande.setUtilisateur(utilisateur);
         demande.setCertification(certification);
@@ -207,6 +216,8 @@ public class AttestationServiceImpl implements AttestationService {
         return demandeRepository.save(demande).getId();
     }
 
+
+
     /**
      * generate pdf
      *
@@ -229,13 +240,6 @@ public class AttestationServiceImpl implements AttestationService {
             throw new EntityNotMatchException("missing data");
         }
         getAttestationPdf(u, d, demande, s);
-
-        //Demande demand = demandeRepository.findById(idDemande).orElse(null);
-        //demand.setDatetraitement(LocalDateTime.now());
-        //demandeRepository.save(demand);
-
-       // d.setStatut(StatusDemande.DEMANDE_TRAITEE.getStatut());
-       // demandeurRepository.save(d);
         Compteur optionalCompteur = compteurService.findById(1);
         if (optionalCompteur != null) {
             optionalCompteur.setCurrentCount(compteurServiceImpl.incrementCounter());

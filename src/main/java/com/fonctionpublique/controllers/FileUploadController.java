@@ -51,7 +51,7 @@ public class FileUploadController {
         fileUpload = fileUploadServiceImpl.download(fileId);
         return  ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(fileUpload.getType()))
-                        .header(CONTENT_DISPOSITION, "fileupload; fileName\"" + fileUpload.getName()+"\"")
+                .header(CONTENT_DISPOSITION, "fileupload; fileName\"" + fileUpload.getName()+"\"")
                 .body(new ByteArrayResource(fileUpload.getFile()));
 
     }

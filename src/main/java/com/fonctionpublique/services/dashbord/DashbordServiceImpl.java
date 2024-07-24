@@ -4,6 +4,7 @@ import com.fonctionpublique.dto.DemandeDTO;
 import com.fonctionpublique.enumpackage.StatusDemande;
 import com.fonctionpublique.services.demande.DemandeServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -11,12 +12,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 @Service
 public class DashbordServiceImpl implements DashbordService {
 
 
     private final DemandeServiceImpl demandeService;
+
+    public DashbordServiceImpl(@Lazy DemandeServiceImpl demandeService) {
+        this.demandeService = demandeService;
+    }
 
     @Override
     public ResponseEntity<Integer> getCount() {

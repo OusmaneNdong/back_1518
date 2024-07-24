@@ -1,5 +1,6 @@
 package com.fonctionpublique.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,8 +23,12 @@ public class Demande {
     private String urlattestation;
     private String statut;
     private String numerodemande;
+    @JsonFormat(pattern="dd-MM-yyyy")
     private LocalDateTime datedemande;
+    @JsonFormat(pattern="dd-MM-yyyy")
     private LocalDateTime datetraitement;
+    @JsonFormat(pattern="dd-MM-yyyy")
+    private LocalDate dateexpiration;
     private boolean validite;
     private String objetdemande;
     private String descriptiondemande;
@@ -44,9 +49,17 @@ public class Demande {
         Calendar c = Calendar.getInstance();
         //LocalDateTime now = c.getTime().getTime();
         if (localDateTime.isAfter(LocalDate.now())) {
+            validite=true;
             return true;
         }
         return false;
     }
+
+//    public Boolean isExpired(){
+//        LocalDate date = LocalDate.now();
+//        LocalDate expiredDate = date.plusMonths(9);
+//        dateexpiration = expiredDate;
+//        return  true;
+//    }
 
 }

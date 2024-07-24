@@ -55,5 +55,9 @@ public class DemandeurController {
     public ResponseEntity<DemandeurDTO> getById(@PathVariable int id){
         return  ResponseEntity.ok(demandeurServiceImpl.getById(id));
     }
+    @PutMapping("/update")
+    public ResponseEntity<Integer> updateDemandeur(@RequestBody DemandeurDTO demandeurDTO){
+        return  ResponseEntity.ok(demandeurServiceImpl.upadateDemandeur(demandeurDTO));
+    }
 
 }

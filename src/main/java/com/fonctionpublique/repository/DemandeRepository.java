@@ -25,9 +25,6 @@ public interface DemandeRepository extends JpaRepository<Demande, Integer> {
 
     List<Demande> findByDemandeurId(int id);
 
-//    @Query("select * from Demande d where ")
-//    List<Demande> findByDemandeurId(int id);
 
-
-//    List<Demande> findByIdDemandeur(int id);
+    Demande findAttestationById(int id);
 }

@@ -36,6 +36,10 @@ public class UtilisateurController {
     public ResponseEntity<UtilisateurDTO> getById(@PathVariable int id) {
         return ResponseEntity.ok(utilisateurServiceImpl.getById(id));
     }
+    @GetMapping("/nin/{nin}")
+    public ResponseEntity<UtilisateurDTO> getByNin(@PathVariable String nin) {
+        return ResponseEntity.ok(utilisateurServiceImpl.getByNin(nin));
+    }
 
     /**
      * register

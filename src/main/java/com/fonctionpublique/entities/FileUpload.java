@@ -15,7 +15,7 @@ import java.io.Serializable;
 public class FileUpload  implements Serializable {
 
     @Id
-   @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String name;
     private String type;

@@ -1,11 +1,7 @@
 package com.fonctionpublique.services.demande;
 
 import com.fonctionpublique.dto.DemandeDTO;
-import com.fonctionpublique.entities.Demande;
-import com.fonctionpublique.entities.Demandeur;
-import com.google.zxing.WriterException;
 
-import java.io.IOException;
 import java.util.List;
 
 public interface DemandeService {
@@ -13,12 +9,12 @@ public interface DemandeService {
 
     DemandeDTO getById(int id);
 
-    //    boolean creerDemande(DemandeDTO demandeDTO);
-    Integer creerDemande(int id) throws IOException, WriterException;
+    Integer creerDemande(int id);
 
     List<DemandeDTO> findByStatut(String status);
 
     List<DemandeDTO> findByDemandeurId(int id);
 
 
+    String findAttestation(int id);
 }

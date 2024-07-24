@@ -13,7 +13,6 @@ import com.fonctionpublique.handleException.NinAlreadyExistException;
 import com.fonctionpublique.repository.PasswordResetTokenRepository;
 import com.fonctionpublique.repository.ProfileRepository;
 import com.fonctionpublique.repository.UtilisateurRepository;
-import com.fonctionpublique.services.demandeur.DemandeurServiceImpl;
 import com.fonctionpublique.validators.ObjectValidator;
 import com.google.zxing.WriterException;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +36,6 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     private final ProfileRepository profileRepository;
     private final JwtService utilisateurUtil;
     private final AuthenticationManager authenticationManager;
-    private final DemandeurServiceImpl demandeurService;
     private final ObjectValidator<RegistrationRequest> validator;
     private final PasswordResetTokenRepository resetTokenRepository;
 
@@ -50,6 +48,10 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     @Override
     public UtilisateurDTO getById(int id) {
         return convertDTO(utilisateurRepository.findById(id).orElse(null));
+    }
+    @Override
+    public UtilisateurDTO getByNin(String nin) {
+        return  convertToDTO(utilisateurRepository.findByNin(nin).orElse(null));
     }
 
     /**
@@ -105,7 +107,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
                 .nin(utilisateur.getNin())
                 .statut(utilisateur.isStatut())
                 .fullName(utilisateur.getFullName())
-                .demandeurDTO(demandeurService.convertToDTO(utilisateur.getDemandeur()))
+//                .demandeurDTO(demandeurService.convertToDTO(utilisateur.getDemandeur()))
                 .signature(utilisateur.getSignature())
                 .passPort(utilisateur.getPassPort())
                 .typePieces(utilisateur.getTypePieces())
@@ -292,6 +294,8 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
 
     }
+
+
 }
 
 
